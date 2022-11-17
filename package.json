@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "commander": "^9.4.1",
+    "fs": "^0.0.1-security",
+    "puppeteer": "^19.2.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.27.0"
+  }
+}
