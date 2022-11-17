@@ -65,7 +65,11 @@ node nizika.js -c google.cookie
   cokkie: 'google.cookie',
   wait: 25
 }
-successCount:001 45s 2022/11/17 01:23:48
+successCount:001 40s 2022/11/18 01:29:21
+successCount:002 40s 2022/11/18 01:30:02
+~
+successCount:010 40s 2022/11/18 01:35:28
+6min (410s)
 ~
 ```
 
