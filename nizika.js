@@ -7,7 +7,7 @@ const fs = require('fs');
   const program = new commander.Command();
 
   program.description('Delete GooglePhoto tool. for puppeteer')
-    .requiredOption("-c, --cokkie <file>", "(must) cookie file path (json) [.google.com and photos.google.com]")
+    .requiredOption("-c, --cookie <file>", "(must) cookie file path (json) [.google.com and photos.google.com]")
     .option("-l, --loop <num>", "delete loop num", parseInt, 10)
     .option("-n, --not", "not headless option", false)
     .option("-s, --select <num>", "delete select file num", parseInt, 10)
@@ -23,7 +23,7 @@ const fs = require('fs');
   console.log(options);
 
   const headlessOption = options.not ? false : true
-  const cookieFilePath = options.cokkie
+  const cookieFilePath = options.cookie
   const browser = await puppeteer.launch({ headless: headlessOption });
   const page = await browser.newPage();
   const googlePhotoURL = options.url
