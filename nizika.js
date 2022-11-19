@@ -11,7 +11,6 @@ const fs = require('fs');
     .option("-l, --loop <num>", "delete loop num", parseInt, 10)
     .option("-n, --not", "not headless option", false)
     .option("-s, --select <num>", "delete select file num", parseInt, 10)
-    .option("-w, --wait <sec>", "wait init page load time (default: 25)", parseInt)
     .option("-u, --url <url>", "google photos url eg. https://photos.google.com/u/1/", "https://photos.google.com/")
     .parse();
 
@@ -28,10 +27,9 @@ const fs = require('fs');
   const page = await browser.newPage();
   const googlePhotoURL = options.url
 
-  const timeout = 20000;
+  const timeout = 60000 * 3;
   const deleteSelectFileNum = options.select;
   const deleteLoop = options.loop;
-  const waitFistLoad = options.wait * 1000; // TODO
 
   const cookies = JSON.parse(fs.readFileSync(cookieFilePath, 'utf-8'));
   await page.setCookie(...cookies);
@@ -53,10 +51,15 @@ const fs = require('fs');
 
   for (let x = 0; x < deleteLoop; x++) {
     const loopProcTimeStart = new Date()
-    // 画像がロードされるまで待つ
-    // 処理画像がなくなってプログラムが暴走するのを防止するため20-30秒程度はまったほうが良い
-    await new Promise((r) => setTimeout(r, waitFistLoad))
-    for (let i = 0; i < deleteSelectFileNum; i++) {
+   // 画像がロードされるまで待つ
+   // await new Promise((r) => setTimeout(r, waitFistLoad))
+   //#ow49 > div.C3Tghf.T5QJEc > div:nth-child(14) > div > div.K0a18 > div.B4UDrd > h2 > div > div
+   await waitForSelectors(['.xA0gfb'], page);
+   const dateString = await page.$('.xA0gfb');
+
+   console.log(dateString);
+
+   for (let i = 0; i < deleteSelectFileNum; i++) {
       const targetPage = page;
       // waitかけないとキー操作が追いつかずに削除処理にはいるので10枚削除したくても5枚などになってしまう
       await targetPage.keyboard.down("ArrowRight");

@@ -138,7 +138,6 @@ Options:
   -l, --loop <num>     delete loop num (default: 10)
   -n, --not            not headless option (default: false)
   -s, --select <num>   delete select file num (default: 10)
-  -w, --wait <sec>     wait init page load time (default: 25)
   -u, --url <url>      google photos url eg. https://photos.google.com/u/1/ (default: "https://photos.google.com/")
   -h, --help           display help for command
 ```
