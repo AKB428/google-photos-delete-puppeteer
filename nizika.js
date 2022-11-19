@@ -17,102 +17,109 @@ program.description('Delete GooglePhoto tool. for puppeteer')
 const options = program.opts();
 console.log(options);
 
+const headlessOption = options.not ? false : true
+const cookieFilePath = options.cookie
+const googlePhotoURL = options.url
+const deleteSelectFileNum = options.select;
+const deleteLoop = options.loop;
+
 (async () => {
-  const headlessOption = options.not ? false : true
-  const cookieFilePath = options.cookie
-  const googlePhotoURL = options.url
-  const deleteSelectFileNum = options.select;
-  const deleteLoop = options.loop;
+  let exeFlag = true;
+  while (exeFlag) {
+    const browser = await puppeteer.launch({ headless: headlessOption });
+    const page = await browser.newPage();
+    const timeout = 60000 * 3;
 
-  const browser = await puppeteer.launch({ headless: headlessOption });
-  const page = await browser.newPage();
-  const timeout = 60000 * 3;
-
-  const cookies = JSON.parse(fs.readFileSync(cookieFilePath, 'utf-8'));
-  await page.setCookie(...cookies);
-  page.setDefaultTimeout(timeout);
-  const start = new Date();
-  {
-    const targetPage = page;
-    await targetPage.setViewport({ "width": 1151, "height": 843 })
-  }
-  {
-    const targetPage = page;
-    const promises = [];
-    promises.push(targetPage.waitForNavigation());
-    await targetPage.goto(googlePhotoURL);
-    await Promise.all(promises);
-  }
-
-  let successCount = 0;
-
-  for (let x = 0; x < deleteLoop; x++) {
-    const loopProcTimeStart = new Date()
-    // 画像がロードされるまで待つ
-    // await new Promise((r) => setTimeout(r, waitFistLoad))
-    //#ow49 > div.C3Tghf.T5QJEc > div:nth-child(14) > div > div.K0a18 > div.B4UDrd > h2 > div > div
-    const dateElm = await waitForSelectors(['.xA0gfb'], page);
-    const targetDate = await (await dateElm.getProperty('textContent')).jsonValue();
-
-    //console.log("target photo date = " + value);
-
-    for (let i = 0; i < deleteSelectFileNum; i++) {
+    const cookies = JSON.parse(fs.readFileSync(cookieFilePath, 'utf-8'));
+    await page.setCookie(...cookies);
+    page.setDefaultTimeout(timeout);
+    const start = new Date();
+    {
       const targetPage = page;
-      // waitかけないとキー操作が追いつかずに削除処理にはいるので10枚削除したくても5枚などになってしまう
-      await targetPage.keyboard.down("ArrowRight");
-      await new Promise((r) => setTimeout(r, 200))
-      await targetPage.keyboard.up("ArrowRight");
-      await new Promise((r) => setTimeout(r, 200))
-
-      await targetPage.keyboard.down("x");
-      await new Promise((r) => setTimeout(r, 200))
-      await targetPage.keyboard.up("x");
-      await new Promise((r) => setTimeout(r, 200))
-
-      // TODO 「10枚選択しています」のメッセージを確認して足りない枚数分キー操作をリトライする
-      // TODO 画像がないのを検知する仕組みが必要、親プロセスに終了を告知する
+      await targetPage.setViewport({ "width": 1151, "height": 843 })
     }
-    await new Promise((r) => setTimeout(r, 2000))
-
-    try {
-      const targetPage = page;
-      await targetPage.keyboard.down("#");
-      await new Promise((r) => setTimeout(r, 200))
-      await targetPage.keyboard.up("#");
-      // 削除確認ダイアログがでるのを待つ
-      await new Promise((r) => setTimeout(r, 3000))
-      await targetPage.keyboard.down("Enter");
-      await new Promise((r) => setTimeout(r, (deleteSelectFileNum / 10) * 1000))
-      successCount++;
-    } catch {
-      console.log("delete Fail");
-      await new Promise((r) => setTimeout(r, 5000))
-      continue;
-    }
-
     {
       const targetPage = page;
       const promises = [];
       promises.push(targetPage.waitForNavigation());
-
       await targetPage.goto(googlePhotoURL);
       await Promise.all(promises);
     }
-    const loopProcTime = new Date() - loopProcTimeStart
-    const loopProcTimeSec = Math.floor(loopProcTime / 1000)
-    const successCountPad = successCount.toString().padStart(3, '0')
-    const timelog = format("count:%s target=%s %ds %s", successCountPad, targetDate, loopProcTimeSec, getCurrentTime())
-    console.log(timelog)
+
+    let successCount = 0;
+
+    for (let x = 0; x < deleteLoop; x++) {
+      const loopProcTimeStart = new Date()
+      // 画像がロードされるまで待つ
+      // await new Promise((r) => setTimeout(r, waitFistLoad))
+      //#ow49 > div.C3Tghf.T5QJEc > div:nth-child(14) > div > div.K0a18 > div.B4UDrd > h2 > div > div
+      const dateElm = await waitForSelectors(['.xA0gfb'], page);
+      const targetDate = await (await dateElm.getProperty('textContent')).jsonValue();
+
+      //console.log("target photo date = " + value);
+
+      for (let i = 0; i < deleteSelectFileNum; i++) {
+        const targetPage = page;
+        // waitかけないとキー操作が追いつかずに削除処理にはいるので10枚削除したくても5枚などになってしまう
+        await targetPage.keyboard.down("ArrowRight");
+        await new Promise((r) => setTimeout(r, 200))
+        await targetPage.keyboard.up("ArrowRight");
+        await new Promise((r) => setTimeout(r, 200))
+
+        await targetPage.keyboard.down("x");
+        await new Promise((r) => setTimeout(r, 200))
+        await targetPage.keyboard.up("x");
+        await new Promise((r) => setTimeout(r, 200))
+
+        // TODO 「10枚選択しています」のメッセージを確認して足りない枚数分キー操作をリトライする
+        // TODO 画像がないのを検知する仕組みが必要、親プロセスに終了を告知する
+      }
+      await new Promise((r) => setTimeout(r, 2000))
+
+      try {
+        const targetPage = page;
+        await targetPage.keyboard.down("#");
+        await new Promise((r) => setTimeout(r, 200))
+        await targetPage.keyboard.up("#");
+        // 削除確認ダイアログがでるのを待つ
+        await new Promise((r) => setTimeout(r, 3000))
+        await targetPage.keyboard.down("Enter");
+        await new Promise((r) => setTimeout(r, (deleteSelectFileNum / 10) * 1000))
+        successCount++;
+      } catch {
+        console.log("delete Fail");
+        await new Promise((r) => setTimeout(r, 5000))
+        continue;
+      }
+
+      {
+        const targetPage = page;
+        const promises = [];
+        promises.push(targetPage.waitForNavigation());
+
+        await targetPage.goto(googlePhotoURL);
+        await Promise.all(promises);
+      }
+      const loopProcTime = new Date() - loopProcTimeStart
+      const loopProcTimeSec = Math.floor(loopProcTime / 1000)
+      const successCountPad = successCount.toString().padStart(3, '0')
+      const timelog = format("count:%s target=%s %ds %s", successCountPad, targetDate, loopProcTimeSec, getCurrentTime())
+      console.log(timelog)
+    }
+
+    await browser.close();
+
+    const procTime = new Date() - start
+    const procTimeSec = Math.floor(procTime / 1000)
+    const procTimeMin = Math.floor(procTimeSec / 60)
+    const procTimelog = format("%dmin (%ds)", procTimeMin, procTimeSec)
+    console.log(procTimelog)
+
+    if (!options.daemon) {
+      exeFlag = false;
+    }
   }
-
-  await browser.close();
-
-  const procTime = new Date() - start
-  const procTimeSec = Math.floor(procTime / 1000)
-  const procTimeMin = Math.floor(procTimeSec / 60)
-  const procTimelog = format("%dmin (%ds)", procTimeMin, procTimeSec)
-  console.log(procTimelog)
-
+  
   function getCurrentTime() {
     const now = new Date();
     const res = "" + now.getFullYear() + "/" + padZero(now.getMonth() + 1) + "/" + padZero(now.getDate()) + " " + padZero(now.getHours()) +
