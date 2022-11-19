@@ -76,11 +76,16 @@ const deleteLoop = options.loop;
       }
       await new Promise((r) => setTimeout(r, 2000))
 
+      let selectNumlog
       try {
         const targetPage = page;
         await targetPage.keyboard.down("#");
         await new Promise((r) => setTimeout(r, 200))
         await targetPage.keyboard.up("#");
+
+        // X枚取得していますの文字列の取得 .rtExYb
+        const selectNumlogElm = await waitForSelectors(['.rtExYb'], page);
+        selectNumlog = await (await selectNumlogElm.getProperty('textContent')).jsonValue();
         // 削除確認ダイアログがでるのを待つ
         await new Promise((r) => setTimeout(r, 3000))
         await targetPage.keyboard.down("Enter");
@@ -103,7 +108,7 @@ const deleteLoop = options.loop;
       const loopProcTime = new Date() - loopProcTimeStart
       const loopProcTimeSec = Math.floor(loopProcTime / 1000)
       const successCountPad = successCount.toString().padStart(3, '0')
-      const timelog = format("count:%s target=%s %ds %s", successCountPad, targetDate, loopProcTimeSec, getCurrentTime())
+      const timelog = format("count:%s %ds %s target=%s log=%s", successCountPad, loopProcTimeSec, getCurrentTime(), targetDate, selectNumlog)
       console.log(timelog)
     }
 
