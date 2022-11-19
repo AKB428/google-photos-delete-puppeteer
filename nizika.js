@@ -1,31 +1,32 @@
 const puppeteer = require('puppeteer'); // v13.0.0 or later
 const commander = require('commander');
-const {format} = require('util');
+const { format } = require('util');
 const fs = require('fs');
 
+const program = new commander.Command();
+
+program.description('Delete GooglePhoto tool. for puppeteer')
+  .requiredOption("-c, --cookie <file>", "(must) cookie file path (json) [.google.com and photos.google.com]")
+  .option("-d, --daemon", "execute daemon mode", false)
+  .option("-l, --loop <num>", "delete loop num", parseInt, 10)
+  .option("-n, --not", "not headless option", false)
+  .option("-s, --select <num>", "delete select file num", parseInt, 10)
+  .option("-u, --url <url>", "google photos url eg. https://photos.google.com/u/1/", "https://photos.google.com/")
+  .parse();
+
+const options = program.opts();
+console.log(options);
+
 (async () => {
-  const program = new commander.Command();
-
-  program.description('Delete GooglePhoto tool. for puppeteer')
-    .requiredOption("-c, --cookie <file>", "(must) cookie file path (json) [.google.com and photos.google.com]")
-    .option("-l, --loop <num>", "delete loop num", parseInt, 10)
-    .option("-n, --not", "not headless option", false)
-    .option("-s, --select <num>", "delete select file num", parseInt, 10)
-    .option("-u, --url <url>", "google photos url eg. https://photos.google.com/u/1/", "https://photos.google.com/")
-    .parse();
-
-  const options = program.opts();
-  console.log(options);
-
   const headlessOption = options.not ? false : true
   const cookieFilePath = options.cookie
-  const browser = await puppeteer.launch({ headless: headlessOption });
-  const page = await browser.newPage();
   const googlePhotoURL = options.url
-
-  const timeout = 60000 * 3;
   const deleteSelectFileNum = options.select;
   const deleteLoop = options.loop;
+
+  const browser = await puppeteer.launch({ headless: headlessOption });
+  const page = await browser.newPage();
+  const timeout = 60000 * 3;
 
   const cookies = JSON.parse(fs.readFileSync(cookieFilePath, 'utf-8'));
   await page.setCookie(...cookies);
@@ -47,15 +48,15 @@ const fs = require('fs');
 
   for (let x = 0; x < deleteLoop; x++) {
     const loopProcTimeStart = new Date()
-   // 画像がロードされるまで待つ
-   // await new Promise((r) => setTimeout(r, waitFistLoad))
-   //#ow49 > div.C3Tghf.T5QJEc > div:nth-child(14) > div > div.K0a18 > div.B4UDrd > h2 > div > div
-   const dateElm = await waitForSelectors(['.xA0gfb'], page);
-   const targetDate = await (await dateElm.getProperty('textContent')).jsonValue();
+    // 画像がロードされるまで待つ
+    // await new Promise((r) => setTimeout(r, waitFistLoad))
+    //#ow49 > div.C3Tghf.T5QJEc > div:nth-child(14) > div > div.K0a18 > div.B4UDrd > h2 > div > div
+    const dateElm = await waitForSelectors(['.xA0gfb'], page);
+    const targetDate = await (await dateElm.getProperty('textContent')).jsonValue();
 
-   //console.log("target photo date = " + value);
+    //console.log("target photo date = " + value);
 
-   for (let i = 0; i < deleteSelectFileNum; i++) {
+    for (let i = 0; i < deleteSelectFileNum; i++) {
       const targetPage = page;
       // waitかけないとキー操作が追いつかずに削除処理にはいるので10枚削除したくても5枚などになってしまう
       await targetPage.keyboard.down("ArrowRight");
