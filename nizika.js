@@ -15,10 +15,6 @@ const fs = require('fs');
     .parse();
 
   const options = program.opts();
-  if (typeof options.wait === 'undefined') {
-    options.wait = 25;
-  }
-
   console.log(options);
 
   const headlessOption = options.not ? false : true
@@ -54,10 +50,10 @@ const fs = require('fs');
    // 画像がロードされるまで待つ
    // await new Promise((r) => setTimeout(r, waitFistLoad))
    //#ow49 > div.C3Tghf.T5QJEc > div:nth-child(14) > div > div.K0a18 > div.B4UDrd > h2 > div > div
-   await waitForSelectors(['.xA0gfb'], page);
-   const dateString = await page.$('.xA0gfb');
+   const dateElm = await waitForSelectors(['.xA0gfb'], page);
+   const targetDate = await (await dateElm.getProperty('textContent')).jsonValue();
 
-   console.log(dateString);
+   //console.log("target photo date = " + value);
 
    for (let i = 0; i < deleteSelectFileNum; i++) {
       const targetPage = page;
@@ -104,7 +100,7 @@ const fs = require('fs');
     const loopProcTime = new Date() - loopProcTimeStart
     const loopProcTimeSec = Math.floor(loopProcTime / 1000)
     const successCountPad = successCount.toString().padStart(3, '0')
-    const timelog = format("successCount:%s %ds %s", successCountPad, loopProcTimeSec, getCurrentTime())
+    const timelog = format("count:%s target=%s %ds %s", successCountPad, targetDate, loopProcTimeSec, getCurrentTime())
     console.log(timelog)
   }
 
@@ -129,7 +125,6 @@ const fs = require('fs');
 
   // gen chrome dev tool code
 
-  // eslint-disable-next-line no-unused-vars
   async function waitForSelectors(selectors, frame, options) {
     for (const selector of selectors) {
       try {
@@ -170,7 +165,6 @@ const fs = require('fs');
     }, timeout);
   }
 
-  // eslint-disable-next-line no-unused-vars
   async function waitForSelector(selector, frame, options) {
     if (!Array.isArray(selector)) {
       selector = [selector];
