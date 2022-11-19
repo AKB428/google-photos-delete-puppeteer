@@ -88,12 +88,17 @@ const deleteLoop = options.loop;
 
       {
         const targetPage = page;
-        await targetPage.keyboard.down("Enter");
+        const promises = [];
+
+        promises.push(targetPage.keyboard.down("Enter"))
+
         // 描写が変わるのを待つ
-        
-        await new Promise((r) => setTimeout(r, 2000))
-        //  promises.push(targetPage.waitForNavigation());
-        // await Promise.all(promises);
+        // TODO CSSセレクタでなんとかする
+        // 10枚削除の場合  1 + 1 = 2秒,  20枚削除の場合 2 + 1 = 3秒
+        const waitNextProcSec = ((deleteSelectFileNum/10) * 1000 ) + 1000
+        promises.push(new Promise((r) => setTimeout(r, waitNextProcSec)))
+
+        await Promise.all(promises);
       }
       const loopProcTime = new Date() - loopProcTimeStart
       const loopProcTimeSec = Math.floor(loopProcTime / 1000)
