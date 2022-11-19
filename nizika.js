@@ -56,8 +56,6 @@ const deleteLoop = options.loop;
       const dateElm = await waitForSelectors(['.xA0gfb'], page);
       const targetDate = await (await dateElm.getProperty('textContent')).jsonValue();
 
-      //console.log("target photo date = " + value);
-
       for (let i = 0; i < deleteSelectFileNum; i++) {
         const targetPage = page;
         // waitかけないとキー操作が追いつかずに削除処理にはいるので10枚削除したくても5枚などになってしまう
@@ -74,26 +72,24 @@ const deleteLoop = options.loop;
         // TODO 「10枚選択しています」のメッセージを確認して足りない枚数分キー操作をリトライする
         // TODO 画像がないのを検知する仕組みが必要、親プロセスに終了を告知する
       }
-      await new Promise((r) => setTimeout(r, 2000))
+      // await new Promise((r) => setTimeout(r, 2000))
+      // X枚取得していますの文字列の取得 .rtExYb
+      const selectNumlogElm = await waitForSelectors(['.rtExYb'], page);
+      const selectNumlog = await (await selectNumlogElm.getProperty('textContent')).jsonValue();
 
-      let selectNumlog
       try {
         const targetPage = page;
         await targetPage.keyboard.down("#");
         await new Promise((r) => setTimeout(r, 200))
         await targetPage.keyboard.up("#");
 
-        // X枚取得していますの文字列の取得 .rtExYb
-        const selectNumlogElm = await waitForSelectors(['.rtExYb'], page);
-        selectNumlog = await (await selectNumlogElm.getProperty('textContent')).jsonValue();
         // 削除確認ダイアログがでるのを待つ
         await new Promise((r) => setTimeout(r, 3000))
         await targetPage.keyboard.down("Enter");
         await new Promise((r) => setTimeout(r, (deleteSelectFileNum / 10) * 1000))
         successCount++;
       } catch {
-        console.log("delete Fail");
-        await new Promise((r) => setTimeout(r, 5000))
+        console.log("Fail: delete");
         continue;
       }
 
