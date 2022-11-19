@@ -63,7 +63,6 @@ node nizika.js -c google.cookie
   select: 10,
   url: 'https://photos.google.com/',
   cokkie: 'google.cookie',
-  wait: 25
 }
 successCount:001 40s 2022/11/18 01:29:21
 successCount:002 40s 2022/11/18 01:30:02
@@ -102,12 +101,10 @@ node nizika.js -c google.cookie -s 50 -l 20
 大量の画像を削除したい場合-lオプションの値を999などにします。ただし1プロセスでの処理を続けることになるためブラウザのメモリを食いつぶすことにもなるため推奨しません。永続的に画像を削除し続ける場合はシェルでプロセスを実行し続けるようにします。後述
 
 
-## 画像を永遠に削除し続ける (推奨実行方法)
-
-unix系シェルの場合になります
+## 画像を永遠に削除し続ける -d オプション (推奨実行方法)
 
 ```
-while true; do node nizika.js -c google.cookie -s 50; done
+node nizika.js -c google.cookie -s 50 -d
 ```
 
 サーバーで実行させるときや、寝る前に自宅PCで動作させる時などを想定しています。
@@ -115,8 +112,8 @@ while true; do node nizika.js -c google.cookie -s 50; done
 
 1. 50枚の画像を選択し削除する
 2. [1.]を10回繰り返す (500枚削除)
-3. プロセスを終了する(ブラウザを閉じる)
-4. プロセスを立ち上げて[1.]から繰り返す
+3. ブラウザを閉じる
+4. ブラウザを再度立ち上げて[1.]から繰り返す
 
 
 ## ヘッドレスをOFFにする（ブラウザを表示させながら動作)
@@ -129,12 +126,13 @@ node nizika.js -c google.cookie -n
 # HELP
 
 ```
-Usage: deleteGooglePhotoPupp [options]
+Usage: nizika [options]
 
 Delete GooglePhoto tool. for puppeteer
 
 Options:
-  -c, --cokkie <file>  (must) cookie file path (json) [.google.com and photos.google.com]
+  -c, --cookie <file>  (must) cookie file path (json) [.google.com and photos.google.com]
+  -d, --daemon         execute daemon mode (default: false)
   -l, --loop <num>     delete loop num (default: 10)
   -n, --not            not headless option (default: false)
   -s, --select <num>   delete select file num (default: 10)
