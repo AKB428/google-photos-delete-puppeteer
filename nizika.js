@@ -50,16 +50,13 @@ const deleteLoop = options.loop;
 
     for (let x = 0; x < deleteLoop; x++) {
       const loopProcTimeStart = new Date()
-      // 画像がロードされるまで待つ
-      // TODO 2回目の場合 sleepかけないと前ページの間にキー操作をし始めてしまう
-
-      //#ow49 > div.C3Tghf.T5QJEc > div:nth-child(14) > div > div.K0a18 > div.B4UDrd > h2 > div > div
+      // 画像がロードされるまで待つ　画像の日付文字列を待機する
       const dateElm = await waitForSelectors(['.xA0gfb'], page);
       const targetDate = await (await dateElm.getProperty('textContent')).jsonValue();
 
       for (let i = 0; i < deleteSelectFileNum; i++) {
         const targetPage = page;
-        // waitかけないとキー操作が追いつかずに削除処理にはいるので10枚削除したくても5枚などになってしまう
+        // TODO 50枚処理の時などはwaitかけないとキー操作が追いつかずに削除処理にはいるので10枚削除したくても5枚などになってしまう
         await targetPage.keyboard.down("ArrowRight");
         await new Promise((r) => setTimeout(r, 200))
         await targetPage.keyboard.up("ArrowRight");
@@ -70,11 +67,8 @@ const deleteLoop = options.loop;
         await targetPage.keyboard.up("x");
         await new Promise((r) => setTimeout(r, 200))
 
-        // TODO 「10枚選択しています」のメッセージを確認して足りない枚数分キー操作をリトライする
         // TODO 画像がないのを検知する仕組みが必要
       }
-      // await new Promise((r) => setTimeout(r, 2000))
-      // X枚取得していますの文字列の取得 .rtExYb
       const selectNumlogElm = await waitForSelectors(['.rtExYb'], page);
       const selectNumlog = await (await selectNumlogElm.getProperty('textContent')).jsonValue();
 
@@ -84,9 +78,8 @@ const deleteLoop = options.loop;
         await new Promise((r) => setTimeout(r, 200))
         await targetPage.keyboard.up("#");
 
-        // 削除確認ダイアログがでるのを待つ
-        // TODO CSSセレクタで待機する
-        await new Promise((r) => setTimeout(r, 3000))
+        // 削除しますか？ダイアログを待つ
+        await waitForSelector('[id^="dwrFZd"]', page);//dwrFZd0 -> dwrFZd1
         successCount++;
       } catch {
         console.log("Fail: delete");
@@ -97,6 +90,7 @@ const deleteLoop = options.loop;
         const targetPage = page;
         await targetPage.keyboard.down("Enter");
         // 描写が変わるのを待つ
+        
         await new Promise((r) => setTimeout(r, 2000))
         //  promises.push(targetPage.waitForNavigation());
         // await Promise.all(promises);
