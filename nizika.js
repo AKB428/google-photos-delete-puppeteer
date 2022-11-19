@@ -51,7 +51,8 @@ const deleteLoop = options.loop;
     for (let x = 0; x < deleteLoop; x++) {
       const loopProcTimeStart = new Date()
       // 画像がロードされるまで待つ
-      // await new Promise((r) => setTimeout(r, waitFistLoad))
+      // TODO 2回目の場合 sleepかけないと前ページの間にキー操作をし始めてしまう
+
       //#ow49 > div.C3Tghf.T5QJEc > div:nth-child(14) > div > div.K0a18 > div.B4UDrd > h2 > div > div
       const dateElm = await waitForSelectors(['.xA0gfb'], page);
       const targetDate = await (await dateElm.getProperty('textContent')).jsonValue();
@@ -70,7 +71,7 @@ const deleteLoop = options.loop;
         await new Promise((r) => setTimeout(r, 200))
 
         // TODO 「10枚選択しています」のメッセージを確認して足りない枚数分キー操作をリトライする
-        // TODO 画像がないのを検知する仕組みが必要、親プロセスに終了を告知する
+        // TODO 画像がないのを検知する仕組みが必要
       }
       // await new Promise((r) => setTimeout(r, 2000))
       // X枚取得していますの文字列の取得 .rtExYb
@@ -84,9 +85,8 @@ const deleteLoop = options.loop;
         await targetPage.keyboard.up("#");
 
         // 削除確認ダイアログがでるのを待つ
+        // TODO CSSセレクタで待機する
         await new Promise((r) => setTimeout(r, 3000))
-        await targetPage.keyboard.down("Enter");
-        await new Promise((r) => setTimeout(r, (deleteSelectFileNum / 10) * 1000))
         successCount++;
       } catch {
         console.log("Fail: delete");
@@ -95,11 +95,11 @@ const deleteLoop = options.loop;
 
       {
         const targetPage = page;
-        const promises = [];
-        promises.push(targetPage.waitForNavigation());
-
-        await targetPage.goto(googlePhotoURL);
-        await Promise.all(promises);
+        await targetPage.keyboard.down("Enter");
+        // 描写が変わるのを待つ
+        await new Promise((r) => setTimeout(r, 2000))
+        //  promises.push(targetPage.waitForNavigation());
+        // await Promise.all(promises);
       }
       const loopProcTime = new Date() - loopProcTimeStart
       const loopProcTimeSec = Math.floor(loopProcTime / 1000)
@@ -280,5 +280,5 @@ const deleteLoop = options.loop;
   }
 })().catch(err => {
   console.error(err);
-  process.exit(1);
+  //process.exit(1);
 });
