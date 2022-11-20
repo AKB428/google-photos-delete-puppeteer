@@ -50,9 +50,28 @@ const deleteLoop = options.loop;
 
     for (let x = 0; x < deleteLoop; x++) {
       const loopProcTimeStart = new Date()
-      // 画像がロードされるまで待つ　画像の日付文字列を待機する
-      const dateElm = await waitForSelectors(['.xA0gfb'], page);
-      const targetDate = await (await dateElm.getProperty('textContent')).jsonValue();
+      let targetDate
+      try {
+        // 画像がロードされるまで待つ　画像の日付文字列を待機する
+        const dateElm = await waitForSelectors(['.xA0gfb'], page);
+        targetDate = await (await dateElm.getProperty('textContent')).jsonValue();
+      }
+      catch (err) {
+        console.error(err);
+        // 画面戦闘にある画像が欠損していると想定(灰色の画像)
+        // ブラウザをスクロースして移動する
+        const _timeout = 100
+        const element = await waitForSelectors([["#yDmH0d > c-wiz > div.h8plyb.HnzzId > div > div"]], page, { _timeout, visible: true });
+        await scrollIntoViewIfNeeded(element, timeout);
+        await element.click({
+          offset: {
+            x: 45.49609375,
+            y: 382.005859375,
+          },
+        });
+        continue
+      }
+
 
       for (let i = 0; i < deleteSelectFileNum; i++) {
         const targetPage = page;
@@ -72,6 +91,9 @@ const deleteLoop = options.loop;
       const selectNumlogElm = await waitForSelectors(['.rtExYb'], page);
       const selectNumlog = await (await selectNumlogElm.getProperty('textContent')).jsonValue();
 
+      // TODO　選択した画像が指定した枚数に満たない場合、キー操作が巡回していると判断して枚数を減らす
+      // 11以上だったら10に、そうでなく6以上だったら5に　
+      
       try {
         const targetPage = page;
         await targetPage.keyboard.down("#");
@@ -95,7 +117,7 @@ const deleteLoop = options.loop;
         // 描写が変わるのを待つ
         // TODO CSSセレクタでなんとかする
         // 10枚削除の場合  1 + 1 = 2秒,  20枚削除の場合 2 + 1 = 3秒
-        const waitNextProcSec = ((deleteSelectFileNum/10) * 1000 ) + 1000
+        const waitNextProcSec = ((deleteSelectFileNum / 10) * 1000) + 1000
         promises.push(new Promise((r) => setTimeout(r, waitNextProcSec)))
 
         await Promise.all(promises);
@@ -119,7 +141,7 @@ const deleteLoop = options.loop;
       exeFlag = false;
     }
   }
-  
+
   function getCurrentTime() {
     const now = new Date();
     const res = "" + now.getFullYear() + "/" + padZero(now.getMonth() + 1) + "/" + padZero(now.getDate()) + " " + padZero(now.getHours()) +
