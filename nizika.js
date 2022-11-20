@@ -60,15 +60,21 @@ const deleteLoop = options.loop;
         console.error(err);
         // 画面戦闘にある画像が欠損していると想定(灰色の画像)
         // ブラウザをスクロースして移動する
-        const _timeout = 100
-        const element = await waitForSelectors([["#yDmH0d > c-wiz > div.h8plyb.HnzzId > div > div"]], page, { _timeout, visible: true });
-        await scrollIntoViewIfNeeded(element, timeout);
-        await element.click({
-          offset: {
-            x: 45.49609375,
-            y: 382.005859375,
-          },
-        });
+        try {
+          const _timeout = 100
+          const element = await waitForSelectors([["#yDmH0d > c-wiz > div.h8plyb.HnzzId > div > div"]], page, { _timeout, visible: true });
+          await scrollIntoViewIfNeeded(element, timeout);
+          await element.click({
+            offset: {
+              x: 45.49609375,
+              y: 382.005859375,
+            },
+          });
+        }
+        catch (err) {
+          console.error(err);
+          continue
+        }
         continue
       }
 
@@ -93,7 +99,7 @@ const deleteLoop = options.loop;
 
       // TODO　選択した画像が指定した枚数に満たない場合、キー操作が巡回していると判断して枚数を減らす
       // 11以上だったら10に、そうでなく6以上だったら5に　
-      
+
       try {
         const targetPage = page;
         await targetPage.keyboard.down("#");
