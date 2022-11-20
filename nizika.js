@@ -45,7 +45,8 @@ function myParseInt(value) {
     await page.setCookie(...cookies);
     page.setDefaultTimeout(timeout);
     const start = new Date();
-
+    // ブラウザを閉じたら初期値にリセットする
+    let _deleteSelectFileNum = deleteSelectFileNum
     await page.setViewport({ "width": width, "height": height })
     const promises = [];
     promises.push(page.waitForNavigation());
@@ -88,7 +89,7 @@ function myParseInt(value) {
         continue
       }
 
-      for (let i = 0; i < deleteSelectFileNum; i++) {
+      for (let i = 0; i < _deleteSelectFileNum; i++) {
 
         await page.keyboard.down("ArrowRight");
         await new Promise((r) => setTimeout(r, 200))
@@ -105,8 +106,24 @@ function myParseInt(value) {
       const selectNumlogElm = await waitForSelectors(['.rtExYb'], page);
       const selectNumlog = await (await selectNumlogElm.getProperty('textContent')).jsonValue();
 
-      //TODO 選択した画像が指定した枚数に満たない場合、キー操作が巡回していると判断して枚数を減らす
+      //選択した画像が指定した枚数に大幅に満たない場合、キー操作が巡回していると判断して枚数を減らす
       //11以上だったら10に、そうでなく6以上だったら5に
+      {
+        const regex = /[^0-9]/g;
+        const numLogVal = parseInt(selectNumlog.replace(regex, ""), 10);
+        let old = _deleteSelectFileNum
+        const diff = _deleteSelectFileNum - numLogVal
+        if (_deleteSelectFileNum > 10 && diff >= 10) {
+          _deleteSelectFileNum = _deleteSelectFileNum - 10;
+          const fixLog = format("Fix _deleteSelectFileNum  %d -> %d numLogVal=%d diff=%d", old, _deleteSelectFileNum, numLogVal, diff)
+          console.log(fixLog)
+        }
+        else if (_deleteSelectFileNum <= 10 && _deleteSelectFileNum > 5 && diff >= 5) {
+          _deleteSelectFileNum = 5;
+          const fixLog = format("Fix _deleteSelectFileNum  %d -> %d numLogVal=%d diff=%d", old, _deleteSelectFileNum, numLogVal, diff)
+          console.log(fixLog)
+        }
+      }
 
       try {
         await page.keyboard.down("#");
@@ -128,7 +145,7 @@ function myParseInt(value) {
         // 描写が変わるのを待つ
         // TODO CSSセレクタでなんとかする
         // 10枚削除の場合  1 + 1 = 2秒,  20枚削除の場合 2 + 1 = 3秒
-        const waitNextProcSec = ((deleteSelectFileNum / 10) * 1000) + 1000
+        const waitNextProcSec = ((_deleteSelectFileNum / 10) * 1000) + 1000
         promises.push(new Promise((r) => setTimeout(r, waitNextProcSec)))
 
         await Promise.all(promises);
