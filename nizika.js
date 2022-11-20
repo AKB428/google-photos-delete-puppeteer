@@ -8,9 +8,10 @@ const program = new commander.Command();
 program.description('Delete GooglePhoto tool. for puppeteer')
   .requiredOption("-c, --cookie <file>", "(must) cookie file path (json) [.google.com and photos.google.com]")
   .option("-d, --daemon", "execute daemon mode", false)
-  .option("-l, --loop <num>", "delete loop num", parseInt, 10)
+  .option("-l, --loop <num>", "delete loop num", myParseInt, 10)
   .option("-n, --not", "not headless option", false)
-  .option("-s, --select <num>", "delete select file num", parseInt, 10)
+  .option("-s, --select <num>", "delete select file num", myParseInt, 10)
+  .option("-t, --timeout <sec>", "page initialize timeout", myParseInt, 180)
   .option("-u, --url <url>", "google photos url eg. https://photos.google.com/u/1/", "https://photos.google.com/")
   .parse();
 
@@ -22,15 +23,25 @@ const cookieFilePath = options.cookie
 const googlePhotoURL = options.url
 const deleteSelectFileNum = options.select;
 const deleteLoop = options.loop;
+const timeout = options.timeout * 1000;
 const width = 1151;
 const height = 843;
+
+function myParseInt(value) {
+  // parseInt takes a string and a radix
+  const parsedValue = parseInt(value, 10);
+  if (isNaN(parsedValue)) {
+    throw new commander.InvalidArgumentError('Not a number.');
+  }
+  return parsedValue;
+}
+
 
 (async () => {
   let exeFlag = true;
   while (exeFlag) {
     const browser = await puppeteer.launch({ headless: headlessOption });
     const page = await browser.newPage();
-    const timeout = 60 * 1000 * 1;
 
     const cookies = JSON.parse(fs.readFileSync(cookieFilePath, 'utf-8'));
     await page.setCookie(...cookies);
@@ -63,11 +74,11 @@ const height = 843;
       catch (err) {
         console.error(err);
         // 画面戦闘にある画像が欠損していると想定(灰色の画像)
-        // ブラウザをスクロースして移動する
+        // 右のカレンダー時系列バーの真ん中をクリックして移動
         try {
             // これだとうまくいかない
             /*page.evaluate(_ => {
-             window.scrollBy(0, window.innerHeight);
+             window[1].scrollBy(0, window.innerHeight);
             });*/
             const timeout = 100
             const element = await waitForSelectors([["#yDmH0d"]], targetPage, { timeout, visible: true });
