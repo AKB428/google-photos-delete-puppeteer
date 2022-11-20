@@ -28,14 +28,12 @@ const width = 1151;
 const height = 843;
 
 function myParseInt(value) {
-  // parseInt takes a string and a radix
   const parsedValue = parseInt(value, 10);
   if (isNaN(parsedValue)) {
     throw new commander.InvalidArgumentError('Not a number.');
   }
   return parsedValue;
 }
-
 
 (async () => {
   let exeFlag = true;
@@ -47,24 +45,18 @@ function myParseInt(value) {
     await page.setCookie(...cookies);
     page.setDefaultTimeout(timeout);
     const start = new Date();
-    {
-      const targetPage = page;
-      await targetPage.setViewport({ "width": width, "height": height })
-    }
-    {
-      const targetPage = page;
-      const promises = [];
-      promises.push(targetPage.waitForNavigation());
-      await targetPage.goto(googlePhotoURL);
-      await Promise.all(promises);
-    }
+
+    await page.setViewport({ "width": width, "height": height })
+    const promises = [];
+    promises.push(page.waitForNavigation());
+    await page.goto(googlePhotoURL);
+    await Promise.all(promises);
 
     let successCount = 0;
 
     for (let x = 0; x < deleteLoop; x++) {
       const loopProcTimeStart = new Date()
       let targetDate
-      const targetPage = page;
 
       try {
         //画像がロードされるまで待つ画像の日付文字列を待機する
@@ -81,7 +73,7 @@ function myParseInt(value) {
            window[1].scrollBy(0, window.innerHeight);
           });*/
           const timeout = 100
-          const element = await waitForSelectors([["#yDmH0d"]], targetPage, { timeout, visible: true });
+          const element = await waitForSelectors([["#yDmH0d"]], page, { timeout, visible: true });
           await scrollIntoViewIfNeeded(element, timeout);
           await element.click({
             offset: {
@@ -96,21 +88,19 @@ function myParseInt(value) {
         continue
       }
 
-
       for (let i = 0; i < deleteSelectFileNum; i++) {
-        const targetPage = page;
-        // TODO 50枚処理の時などはwaitかけないとキー操作が追いつかずに削除処理にはいるので10枚削除したくても5枚などになってしまう
-        await targetPage.keyboard.down("ArrowRight");
+
+        await page.keyboard.down("ArrowRight");
         await new Promise((r) => setTimeout(r, 200))
-        await targetPage.keyboard.up("ArrowRight");
+        await page.keyboard.up("ArrowRight");
         await new Promise((r) => setTimeout(r, 200))
 
-        await targetPage.keyboard.down("x");
+        await page.keyboard.down("x");
         await new Promise((r) => setTimeout(r, 200))
-        await targetPage.keyboard.up("x");
+        await page.keyboard.up("x");
         await new Promise((r) => setTimeout(r, 200))
 
-        // TODO 画像がないのを検知する仕組みが必要
+        // TODO 削除し終わって画像がないのを検知する仕組みが必要
       }
       const selectNumlogElm = await waitForSelectors(['.rtExYb'], page);
       const selectNumlog = await (await selectNumlogElm.getProperty('textContent')).jsonValue();
@@ -119,10 +109,9 @@ function myParseInt(value) {
       //11以上だったら10に、そうでなく6以上だったら5に
 
       try {
-        const targetPage = page;
-        await targetPage.keyboard.down("#");
+        await page.keyboard.down("#");
         await new Promise((r) => setTimeout(r, 200))
-        await targetPage.keyboard.up("#");
+        await page.keyboard.up("#");
 
         // 削除しますか？ダイアログを待つ
         await waitForSelector('[id^="dwrFZd"]', page);//dwrFZd0 -> dwrFZd1
@@ -133,10 +122,8 @@ function myParseInt(value) {
       }
 
       {
-        const targetPage = page;
         const promises = [];
-
-        promises.push(targetPage.keyboard.down("Enter"))
+        promises.push(page.keyboard.down("Enter"))
 
         // 描写が変わるのを待つ
         // TODO CSSセレクタでなんとかする
