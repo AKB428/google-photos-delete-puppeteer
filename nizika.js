@@ -67,7 +67,7 @@ function myParseInt(value) {
       const targetPage = page;
 
       try {
-        // 画像がロードされるまで待つ　画像の日付文字列を待機する
+        //画像がロードされるまで待つ画像の日付文字列を待機する
         const dateElm = await waitForSelectors(['.xA0gfb'], page);
         targetDate = await (await dateElm.getProperty('textContent')).jsonValue();
       }
@@ -76,19 +76,19 @@ function myParseInt(value) {
         // 画面戦闘にある画像が欠損していると想定(灰色の画像)
         // 右のカレンダー時系列バーの真ん中をクリックして移動
         try {
-            // これだとうまくいかない
-            /*page.evaluate(_ => {
-             window[1].scrollBy(0, window.innerHeight);
-            });*/
-            const timeout = 100
-            const element = await waitForSelectors([["#yDmH0d"]], targetPage, { timeout, visible: true });
-            await scrollIntoViewIfNeeded(element, timeout);
-            await element.click({
-              offset: {
-                x: width - 10,
-                y: height / 2,
-              },
-            });
+          // これだとうまくいかない
+          /*page.evaluate(_ => {
+           window[1].scrollBy(0, window.innerHeight);
+          });*/
+          const timeout = 100
+          const element = await waitForSelectors([["#yDmH0d"]], targetPage, { timeout, visible: true });
+          await scrollIntoViewIfNeeded(element, timeout);
+          await element.click({
+            offset: {
+              x: width - 10,
+              y: height / 2,
+            },
+          });
         }
         catch (err) {
           console.error(err);
@@ -115,8 +115,8 @@ function myParseInt(value) {
       const selectNumlogElm = await waitForSelectors(['.rtExYb'], page);
       const selectNumlog = await (await selectNumlogElm.getProperty('textContent')).jsonValue();
 
-      // TODO　選択した画像が指定した枚数に満たない場合、キー操作が巡回していると判断して枚数を減らす
-      // 11以上だったら10に、そうでなく6以上だったら5に　
+      //TODO 選択した画像が指定した枚数に満たない場合、キー操作が巡回していると判断して枚数を減らす
+      //11以上だったら10に、そうでなく6以上だったら5に
 
       try {
         const targetPage = page;
