@@ -22,13 +22,15 @@ const cookieFilePath = options.cookie
 const googlePhotoURL = options.url
 const deleteSelectFileNum = options.select;
 const deleteLoop = options.loop;
+const width = 1151;
+const height = 843;
 
 (async () => {
   let exeFlag = true;
   while (exeFlag) {
     const browser = await puppeteer.launch({ headless: headlessOption });
     const page = await browser.newPage();
-    const timeout = 60000 * 3;
+    const timeout = 60 * 1000 * 1;
 
     const cookies = JSON.parse(fs.readFileSync(cookieFilePath, 'utf-8'));
     await page.setCookie(...cookies);
@@ -36,7 +38,7 @@ const deleteLoop = options.loop;
     const start = new Date();
     {
       const targetPage = page;
-      await targetPage.setViewport({ "width": 1151, "height": 843 })
+      await targetPage.setViewport({ "width": width, "height": height })
     }
     {
       const targetPage = page;
@@ -51,6 +53,8 @@ const deleteLoop = options.loop;
     for (let x = 0; x < deleteLoop; x++) {
       const loopProcTimeStart = new Date()
       let targetDate
+      const targetPage = page;
+
       try {
         // 画像がロードされるまで待つ　画像の日付文字列を待機する
         const dateElm = await waitForSelectors(['.xA0gfb'], page);
@@ -61,19 +65,22 @@ const deleteLoop = options.loop;
         // 画面戦闘にある画像が欠損していると想定(灰色の画像)
         // ブラウザをスクロースして移動する
         try {
-          const _timeout = 100
-          const element = await waitForSelectors([["#yDmH0d > c-wiz > div.h8plyb.HnzzId > div > div"]], page, { _timeout, visible: true });
-          await scrollIntoViewIfNeeded(element, timeout);
-          await element.click({
-            offset: {
-              x: 45.49609375,
-              y: 382.005859375,
-            },
-          });
+            // これだとうまくいかない
+            /*page.evaluate(_ => {
+             window.scrollBy(0, window.innerHeight);
+            });*/
+            const timeout = 100
+            const element = await waitForSelectors([["#yDmH0d"]], targetPage, { timeout, visible: true });
+            await scrollIntoViewIfNeeded(element, timeout);
+            await element.click({
+              offset: {
+                x: width - 10,
+                y: height / 2,
+              },
+            });
         }
         catch (err) {
           console.error(err);
-          continue
         }
         continue
       }
