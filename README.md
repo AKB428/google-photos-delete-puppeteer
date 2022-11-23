@@ -8,12 +8,25 @@ Googleフォトの画像を自動的に削除(ゴミ箱に格納)するツール
 ChromeのヘッドレスブラウザツールであるPuppeteerで動作するため画面のないサーバー等でも動作させることが可能です。
 動作確認のためブラウザを表示させての動作も可能です。
 
-## 性能
+## Performance
+
+|delete files|minute|
+|----|-----|
+|1000|16|
+|5000|80|
+
+|delete byte|hour|
+|----|-----|
+|1.4GB|1|
+|7GB|5|
+
+
 - 1000枚の画像を削除するのに16分
 - 5000枚の画像を削除するのに80分
 
 - 1時間で1.4GB削除
 - 5時間で7GB削除
+
 
 
 ![start](./images/nz-start.jpg) ![end](./images/nz-end.jpg)
@@ -194,3 +207,7 @@ Google Photosは画像をゴミ箱に入れた時点でGoogleOneのストレー�
 
 ![main](./images/hason.png)
 
+
+# 免責事項
+
+自己責任で実行してください
